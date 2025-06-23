@@ -1,0 +1,51 @@
+# AIO Exploit Framework Configuration
+# Date: 2025-06-23 22:47:56 UTC
+# User: wKayaa
+
+performance:
+  max_threads: 500
+  timeout: 10
+  concurrent_clusters: 50
+  retry_attempts: 3
+
+input:
+  default_targets: "targets_massive_optimized.txt"
+  alternative_targets:
+    - "targets_goldmine.txt"
+    - "targets.txt"
+  target_formats:
+    - "txt"
+    - "cidr"
+    - "single"
+
+integrations:
+  telegram_enabled: false
+  telegram_token: null
+  telegram_chat_id: null
+  discord_webhook: null
+  
+  # Auto-update settings
+  git_auto_update: true
+  update_check_interval: 3600  # seconds
+
+output:
+  export_json: true
+  export_csv: true
+  export_html: true
+  live_notifications: true
+  output_directory: "exploitation_results"
+
+web_interface:
+  enabled: true
+  host: "0.0.0.0"
+  port: 5000
+  
+api_server:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8080
+
+logging:
+  level: "INFO"
+  file_logging: true
+  console_logging: true
