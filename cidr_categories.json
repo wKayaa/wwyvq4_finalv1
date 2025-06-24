@@ -1,0 +1,491 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-28",
+    "description": "Ultra-comprehensive CIDR list for F8S Pod Exploitation Framework",
+    "total_categories": 10,
+    "author": "wKayaa",
+    "framework": "F8S Pod Exploitation"
+  },
+  "categories": {
+    "enterprise_networks": {
+      "priority": 8,
+      "description": "Fortune 500 companies standard ranges",
+      "stealth_required": true,
+      "scan_intensity": "conservative",
+      "ipv4_ranges": [
+        "10.0.0.0/8",
+        "172.16.0.0/12", 
+        "192.168.0.0/16",
+        "100.64.0.0/10",
+        "198.18.0.0/15",
+        "169.254.0.0/16",
+        "203.0.113.0/24",
+        "198.51.100.0/24",
+        "192.0.2.0/24"
+      ],
+      "ipv6_ranges": [
+        "fd00::/8",
+        "fe80::/10",
+        "fc00::/7"
+      ],
+      "metadata": {
+        "organization_types": ["corporate", "enterprise", "private"],
+        "likelihood": 7,
+        "geographic_distribution": "global",
+        "common_ports": [22, 80, 443, 6443, 8080, 8443]
+      }
+    },
+    "cloud_providers": {
+      "priority": 10,
+      "description": "Major cloud provider ranges - AWS, GCP, Azure, Alibaba, Oracle, IBM",
+      "stealth_required": false,
+      "scan_intensity": "aggressive",
+      "ipv4_ranges": [
+        "3.208.0.0/12",
+        "13.32.0.0/15",
+        "13.64.0.0/11",
+        "13.224.0.0/14",
+        "18.144.0.0/12",
+        "18.208.0.0/13",
+        "20.0.0.0/8",
+        "23.96.0.0/13",
+        "34.64.0.0/10",
+        "35.184.0.0/13",
+        "35.192.0.0/14",
+        "40.64.0.0/10",
+        "44.192.0.0/11",
+        "52.0.0.0/11",
+        "52.96.0.0/12",
+        "52.224.0.0/11",
+        "54.64.0.0/11",
+        "104.40.0.0/13",
+        "104.154.0.0/15",
+        "130.211.0.0/22",
+        "137.116.0.0/16",
+        "138.91.0.0/16",
+        "146.148.0.0/17",
+        "191.232.0.0/13",
+        "207.68.128.0/18",
+        "47.88.0.0/13",
+        "47.254.0.0/16",
+        "119.23.0.0/16",
+        "120.24.0.0/14",
+        "121.40.0.0/14",
+        "129.213.0.0/16",
+        "132.145.0.0/16",
+        "134.70.0.0/16",
+        "140.91.0.0/16",
+        "158.101.0.0/16",
+        "161.156.0.0/16"
+      ],
+      "ipv6_ranges": [
+        "2001:4860::/32",
+        "2404:6800::/32",
+        "2607:f8b0::/32",
+        "2800:3f0::/32",
+        "2a00:1450::/32",
+        "2c0f:f248::/32"
+      ],
+      "metadata": {
+        "organization_types": ["cloud", "hosting", "saas"],
+        "likelihood": 9,
+        "geographic_distribution": "global",
+        "common_ports": [80, 443, 6443, 8080, 8443, 10250, 2379, 2380]
+      }
+    },
+    "container_orchestration": {
+      "priority": 9,
+      "description": "Kubernetes, OpenShift, Rancher, Docker Swarm environments",
+      "stealth_required": false,
+      "scan_intensity": "aggressive",
+      "ipv4_ranges": [
+        "10.0.0.0/16",
+        "10.1.0.0/16",
+        "10.2.0.0/16",
+        "10.10.0.0/16",
+        "10.20.0.0/16",
+        "10.42.0.0/16",
+        "10.43.0.0/16",
+        "10.96.0.0/12",
+        "10.100.0.0/16",
+        "10.200.0.0/16",
+        "10.244.0.0/16",
+        "172.16.0.0/16",
+        "172.17.0.0/16",
+        "172.18.0.0/16",
+        "172.20.0.0/16",
+        "172.30.0.0/16",
+        "192.168.0.0/24",
+        "192.168.1.0/24",
+        "192.168.10.0/24",
+        "192.168.100.0/24",
+        "11.0.0.0/16"
+      ],
+      "ipv6_ranges": [
+        "fd00:10::/32",
+        "fd00:244::/32"
+      ],
+      "metadata": {
+        "organization_types": ["container", "kubernetes", "orchestration"],
+        "likelihood": 8,
+        "geographic_distribution": "global",
+        "common_ports": [6443, 8443, 10250, 2379, 2380, 8080, 9443, 6783, 8472]
+      }
+    },
+    "government_military": {
+      "priority": 2,
+      "description": "DoD, NATO, EU institutions - HIGH RISK",
+      "stealth_required": true,
+      "scan_intensity": "minimal",
+      "ipv4_ranges": [
+        "6.0.0.0/8",
+        "7.0.0.0/8",
+        "11.0.0.0/8",
+        "21.0.0.0/8",
+        "22.0.0.0/8",
+        "26.0.0.0/8",
+        "28.0.0.0/8",
+        "29.0.0.0/8",
+        "30.0.0.0/8",
+        "33.0.0.0/8",
+        "55.0.0.0/8",
+        "214.0.0.0/8",
+        "215.0.0.0/8",
+        "192.12.109.0/24",
+        "192.20.225.0/24",
+        "192.52.193.0/24",
+        "192.54.112.0/24",
+        "192.88.99.0/24"
+      ],
+      "ipv6_ranges": [
+        "2001:1900::/28"
+      ],
+      "metadata": {
+        "organization_types": ["government", "military", "defense"],
+        "likelihood": 3,
+        "geographic_distribution": "restricted",
+        "common_ports": [22, 443, 8443],
+        "warning": "EXTREME CAUTION - LEGAL IMPLICATIONS"
+      }
+    },
+    "isp_telecom": {
+      "priority": 6,
+      "description": "Major carriers and hosting providers",
+      "stealth_required": false,
+      "scan_intensity": "moderate",
+      "ipv4_ranges": [
+        "67.207.64.0/18",
+        "104.131.0.0/16",
+        "104.236.0.0/16",
+        "107.170.0.0/16",
+        "128.199.0.0/16",
+        "134.209.0.0/16",
+        "138.197.0.0/16",
+        "138.68.0.0/16",
+        "139.59.0.0/16",
+        "142.93.0.0/16",
+        "143.110.0.0/16",
+        "146.190.0.0/16",
+        "157.230.0.0/16",
+        "159.65.0.0/16",
+        "159.203.0.0/16",
+        "165.227.0.0/16",
+        "167.99.0.0/16",
+        "178.62.0.0/16",
+        "188.166.0.0/16",
+        "45.32.0.0/16",
+        "45.63.0.0/16",
+        "45.76.0.0/16",
+        "108.61.0.0/16",
+        "149.28.0.0/16",
+        "66.175.192.0/18",
+        "139.162.0.0/16",
+        "172.104.0.0/16",
+        "51.38.0.0/16",
+        "51.68.0.0/16",
+        "51.75.0.0/16",
+        "51.89.0.0/16",
+        "5.9.0.0/16",
+        "78.46.0.0/15",
+        "88.99.0.0/16",
+        "95.216.0.0/16",
+        "116.202.0.0/15",
+        "135.181.0.0/16"
+      ],
+      "ipv6_ranges": [
+        "2001:19f0::/32",
+        "2001:41d0::/32"
+      ],
+      "metadata": {
+        "organization_types": ["isp", "telecom", "hosting"],
+        "likelihood": 6,
+        "geographic_distribution": "global",
+        "common_ports": [80, 443, 22, 8080, 6443]
+      }
+    },
+    "educational": {
+      "priority": 5,
+      "description": "Universities and research institutions",
+      "stealth_required": true,
+      "scan_intensity": "conservative",
+      "ipv4_ranges": [
+        "128.0.0.0/9",
+        "129.0.0.0/9",
+        "130.0.0.0/8",
+        "131.0.0.0/8",
+        "132.0.0.0/8",
+        "134.0.0.0/8",
+        "137.0.0.0/8",
+        "140.0.0.0/8",
+        "143.0.0.0/8",
+        "144.0.0.0/8",
+        "147.0.0.0/8",
+        "149.0.0.0/8",
+        "152.0.0.0/8",
+        "155.0.0.0/8",
+        "158.0.0.0/8",
+        "160.0.0.0/8",
+        "163.0.0.0/8",
+        "164.0.0.0/8",
+        "165.0.0.0/8",
+        "192.12.0.0/16",
+        "198.11.0.0/16"
+      ],
+      "ipv6_ranges": [
+        "2001:400::/23",
+        "2001:500::/23"
+      ],
+      "metadata": {
+        "organization_types": ["education", "research", "academic"],
+        "likelihood": 5,
+        "geographic_distribution": "global",
+        "common_ports": [22, 80, 443, 8080]
+      }
+    },
+    "financial": {
+      "priority": 1,
+      "description": "Banks, trading firms, fintech - EXTREME RISK",
+      "stealth_required": true,
+      "scan_intensity": "minimal",
+      "ipv4_ranges": [
+        "4.0.0.0/8",
+        "8.0.0.0/8",
+        "9.0.0.0/8",
+        "12.0.0.0/8",
+        "16.0.0.0/8",
+        "17.0.0.0/8",
+        "19.0.0.0/8",
+        "35.0.0.0/8",
+        "38.0.0.0/8",
+        "42.0.0.0/8",
+        "65.0.0.0/8",
+        "66.0.0.0/8",
+        "68.0.0.0/8",
+        "69.0.0.0/8",
+        "70.0.0.0/8",
+        "71.0.0.0/8",
+        "72.0.0.0/8",
+        "73.0.0.0/8",
+        "74.0.0.0/8",
+        "75.0.0.0/8"
+      ],
+      "ipv6_ranges": [
+        "2001:1800::/23"
+      ],
+      "metadata": {
+        "organization_types": ["financial", "banking", "trading", "fintech"],
+        "likelihood": 2,
+        "geographic_distribution": "major_financial_centers",
+        "common_ports": [443, 8443],
+        "warning": "EXTREME LEGAL RISK - FINANCIAL REGULATIONS"
+      }
+    },
+    "healthcare": {
+      "priority": 3,
+      "description": "Hospitals and medical research - HIGH RISK HIPAA",
+      "stealth_required": true,
+      "scan_intensity": "minimal",
+      "ipv4_ranges": [
+        "24.0.0.0/8",
+        "32.0.0.0/8",
+        "50.0.0.0/8",
+        "63.0.0.0/8",
+        "64.0.0.0/8",
+        "67.0.0.0/8",
+        "76.0.0.0/8",
+        "96.0.0.0/8",
+        "98.0.0.0/8",
+        "99.0.0.0/8",
+        "173.0.0.0/8",
+        "174.0.0.0/8",
+        "184.0.0.0/8",
+        "192.35.0.0/16",
+        "198.6.0.0/16"
+      ],
+      "ipv6_ranges": [
+        "2001:1700::/23"
+      ],
+      "metadata": {
+        "organization_types": ["healthcare", "medical", "research"],
+        "likelihood": 4,
+        "geographic_distribution": "global",
+        "common_ports": [443, 22, 8080],
+        "warning": "HIPAA COMPLIANCE RISK"
+      }
+    },
+    "critical_infrastructure": {
+      "priority": 1,
+      "description": "Power grids, transportation - EXTREME RISK",
+      "stealth_required": true,
+      "scan_intensity": "minimal",
+      "ipv4_ranges": [
+        "1.0.0.0/8",
+        "2.0.0.0/8",
+        "5.0.0.0/8",
+        "31.0.0.0/8",
+        "36.0.0.0/8",
+        "37.0.0.0/8",
+        "41.0.0.0/8",
+        "43.0.0.0/8",
+        "49.0.0.0/8",
+        "58.0.0.0/8",
+        "59.0.0.0/8",
+        "60.0.0.0/8",
+        "61.0.0.0/8",
+        "101.0.0.0/8",
+        "103.0.0.0/8",
+        "110.0.0.0/8",
+        "111.0.0.0/8",
+        "112.0.0.0/8",
+        "113.0.0.0/8",
+        "114.0.0.0/8",
+        "115.0.0.0/8",
+        "116.0.0.0/8",
+        "117.0.0.0/8",
+        "118.0.0.0/8",
+        "119.0.0.0/8",
+        "120.0.0.0/8",
+        "121.0.0.0/8",
+        "122.0.0.0/8",
+        "123.0.0.0/8",
+        "124.0.0.0/8",
+        "125.0.0.0/8"
+      ],
+      "ipv6_ranges": [
+        "2001:200::/23",
+        "2001:dc0::/32"
+      ],
+      "metadata": {
+        "organization_types": ["infrastructure", "utilities", "transportation"],
+        "likelihood": 2,
+        "geographic_distribution": "global",
+        "common_ports": [22, 443, 502, 1911, 2404],
+        "warning": "CRITICAL INFRASTRUCTURE - NATIONAL SECURITY RISK"
+      }
+    },
+    "emerging_markets": {
+      "priority": 7,
+      "description": "APAC, LATAM, Africa specific ranges",
+      "stealth_required": false,
+      "scan_intensity": "moderate",
+      "ipv4_ranges": [
+        "27.0.0.0/8",
+        "39.0.0.0/8",
+        "42.0.0.0/8",
+        "43.224.0.0/11",
+        "45.64.0.0/10",
+        "77.0.0.0/8",
+        "78.0.0.0/8",
+        "79.0.0.0/8",
+        "80.0.0.0/8",
+        "81.0.0.0/8",
+        "82.0.0.0/8",
+        "83.0.0.0/8",
+        "84.0.0.0/8",
+        "85.0.0.0/8",
+        "86.0.0.0/8",
+        "87.0.0.0/8",
+        "88.0.0.0/8",
+        "89.0.0.0/8",
+        "90.0.0.0/8",
+        "91.0.0.0/8",
+        "92.0.0.0/8",
+        "93.0.0.0/8",
+        "94.0.0.0/8",
+        "95.0.0.0/8",
+        "102.0.0.0/8",
+        "105.0.0.0/8",
+        "154.0.0.0/8",
+        "156.0.0.0/8",
+        "168.0.0.0/8",
+        "170.0.0.0/8",
+        "175.0.0.0/8",
+        "176.0.0.0/8",
+        "177.0.0.0/8",
+        "179.0.0.0/8",
+        "180.0.0.0/8",
+        "181.0.0.0/8",
+        "182.0.0.0/8",
+        "183.0.0.0/8",
+        "185.0.0.0/8",
+        "186.0.0.0/8",
+        "187.0.0.0/8",
+        "189.0.0.0/8",
+        "190.0.0.0/8",
+        "196.0.0.0/8",
+        "197.0.0.0/8",
+        "200.0.0.0/8",
+        "201.0.0.0/8",
+        "202.0.0.0/8"
+      ],
+      "ipv6_ranges": [
+        "2001:250::/23",
+        "2001:da8::/32",
+        "2400::/12",
+        "2800::/12"
+      ],
+      "metadata": {
+        "organization_types": ["emerging", "regional", "local"],
+        "likelihood": 6,
+        "geographic_distribution": "apac_latam_africa",
+        "common_ports": [80, 443, 22, 8080, 6443]
+      }
+    }
+  },
+  "scanning_strategies": {
+    "high_priority": {
+      "categories": ["cloud_providers", "container_orchestration"],
+      "concurrent_limit": 100,
+      "timeout": 5,
+      "retry_count": 2
+    },
+    "medium_priority": {
+      "categories": ["enterprise_networks", "emerging_markets", "isp_telecom"],
+      "concurrent_limit": 50,
+      "timeout": 10,
+      "retry_count": 1
+    },
+    "low_priority": {
+      "categories": ["educational"],
+      "concurrent_limit": 20,
+      "timeout": 15,
+      "retry_count": 1
+    },
+    "extreme_caution": {
+      "categories": ["financial", "critical_infrastructure", "government_military", "healthcare"],
+      "concurrent_limit": 5,
+      "timeout": 30,
+      "retry_count": 0,
+      "requires_explicit_consent": true
+    }
+  },
+  "geographic_regions": {
+    "north_america": ["enterprise_networks", "cloud_providers", "financial", "healthcare"],
+    "europe": ["enterprise_networks", "cloud_providers", "government_military", "educational"],
+    "asia_pacific": ["emerging_markets", "cloud_providers", "container_orchestration"],
+    "latin_america": ["emerging_markets", "isp_telecom"],
+    "africa": ["emerging_markets", "isp_telecom"],
+    "global": ["cloud_providers", "container_orchestration", "isp_telecom"]
+  }
+}
