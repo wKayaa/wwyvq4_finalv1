@@ -215,7 +215,8 @@ class OptimizedF8SMegaLauncher:
         
         try:
             f8s_results = await run_f8s_exploitation(
-                targets=targets,
+                target_ranges=targets,
+                telegram_token=self.telegram_token,
                 exploiter=self.f8s_exploiter,
                 max_concurrent=min(50, self.max_concurrent),
                 timeout=10 if not self.stealth_mode else 30
