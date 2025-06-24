@@ -97,12 +97,13 @@ class CredentialExtractor:
         
         return pairs
 
-# ✅ NEW: Enhanced Perfect Hit Detector
+# ✅ ENHANCED: Perfect Hit Detector with improved filtering
 class EnhancedPerfectHitDetector:
-    """Enhanced detector for all credential types"""
+    """Enhanced detector for all credential types with false positive reduction"""
     
     def __init__(self):
         self.hit_counter = 0
+        # Enhanced patterns with better precision
         self.patterns = {
             'aws_access_key': r'AKIA[0-9A-Z]{16}',
             'aws_secret_key': r'[A-Za-z0-9/+=]{40}',
@@ -113,84 +114,220 @@ class EnhancedPerfectHitDetector:
             'password': r'(?i)password["\']?\s*[:=]\s*["\']([^"\']{8,})["\']',
             'secret': r'(?i)secret["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{16,})["\']'
         }
+        
+        # Enhanced false positive filtering
+        self.test_patterns = {
+            'AKIAIOSFODNN7EXAMPLE',  # AWS docs example
+            'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',  # AWS docs example
+            'SG.SENDGRID_API_KEY',  # SendGrid placeholder
+            'your-api-key-here',
+            'INSERT_YOUR_KEY_HERE',
+            'REPLACE_WITH_YOUR_KEY',
+            'example-key',
+            'test-key',
+            'demo-key'
+        }
+        
+        # Context-aware filtering keywords
+        self.test_keywords = {'example', 'test', 'demo', 'sample', 'fake', 'dummy', 'placeholder'}
     
     def extract_any_credentials(self, content: str, source_url: str) -> Optional[Dict[str, Any]]:
-        """Extract any type of credentials from content"""
+        """Extract any type of credentials from content with enhanced filtering"""
         try:
             for cred_type, pattern in self.patterns.items():
                 matches = re.finditer(pattern, content, re.IGNORECASE)
                 for match in matches:
-                    self.hit_counter += 1
-                    confidence = self._calculate_confidence(cred_type, match.group(0), content)
+                    credential_value = match.group(0)
                     
-                    return {
-                        'type': cred_type,
-                        'value': match.group(0)[:50] + "..." if len(match.group(0)) > 50 else match.group(0),
-                        'url': source_url,
-                        'confidence': confidence,
-                        'hit_id': self.hit_counter,
-                        'timestamp': datetime.utcnow().isoformat()
-                    }
+                    # Enhanced false positive filtering
+                    if self._is_false_positive(credential_value, content, cred_type):
+                        continue
+                    
+                    self.hit_counter += 1
+                    confidence = self._calculate_confidence(cred_type, credential_value, content)
+                    
+                    # Only report high-confidence detections
+                    if confidence >= 75.0:
+                        return {
+                            'type': cred_type,
+                            'value': credential_value[:50] + "..." if len(credential_value) > 50 else credential_value,
+                            'url': source_url,
+                            'confidence': confidence,
+                            'hit_id': self.hit_counter,
+                            'timestamp': datetime.utcnow().isoformat(),
+                            'severity': self._determine_severity(cred_type, confidence, content)
+                        }
             return None
         except Exception as e:
             print(f"❌ Detection error: {e}")
             return None
     
+    def _is_false_positive(self, value: str, content: str, cred_type: str) -> bool:
+        """Enhanced false positive detection"""
+        value_lower = value.lower()
+        content_lower = content.lower()
+        
+        # Check against known test patterns
+        if value in self.test_patterns:
+            return True
+        
+        # Check for test keywords in value
+        for keyword in self.test_keywords:
+            if keyword in value_lower:
+                return True
+        
+        # Check for test context indicators
+        test_context_indicators = ['example', 'test', 'demo', 'sample', 'placeholder', 'dummy', 'fake']
+        for indicator in test_context_indicators:
+            if indicator in content_lower:
+                return True
+        
+        # Specific patterns for each credential type
+        if cred_type == 'aws_access_key':
+            # AWS access keys should start with AKIA and be exactly 20 chars
+            if not value.startswith('AKIA') or len(value) != 20:
+                return True
+        
+        elif cred_type == 'aws_secret_key':
+            # AWS secret keys should be exactly 40 chars and contain mix of chars
+            if len(value) != 40 or value.isdigit() or value.isalpha():
+                return True
+        
+        elif cred_type == 'sendgrid_key':
+            # SendGrid keys have specific format
+            if not value.startswith('SG.') or len(value) < 69:
+                return True
+        
+        return False
+    
+    def _determine_severity(self, cred_type: str, confidence: float, content: str) -> str:
+        """Determine severity level based on credential type and context"""
+        content_lower = content.lower()
+        
+        # Check for production indicators
+        production_indicators = ['production', 'prod', 'live', 'main', 'master']
+        is_production = any(indicator in content_lower for indicator in production_indicators)
+        
+        # High-risk credential types
+        high_risk_types = {'aws_access_key', 'aws_secret_key', 'sendgrid_key'}
+        
+        if confidence >= 95.0 and (cred_type in high_risk_types or is_production):
+            return "CRITICAL"
+        elif confidence >= 85.0 and cred_type in high_risk_types:
+            return "HIGH"
+        elif confidence >= 75.0:
+            return "MEDIUM"
+        else:
+            return "LOW"
+    
     def _calculate_confidence(self, cred_type: str, value: str, content: str) -> float:
-        """Calculate confidence score for detected credential"""
+        """Calculate confidence score for detected credential with enhanced analysis"""
         base_score = 70.0
         
-        # Higher confidence for specific patterns
-        if cred_type == 'aws_access_key' and value.startswith('AKIA'):
+        # Type-specific confidence scoring
+        if cred_type == 'aws_access_key' and value.startswith('AKIA') and len(value) == 20:
             base_score = 95.0
-        elif cred_type == 'sendgrid_key' and value.startswith('SG.'):
+        elif cred_type == 'sendgrid_key' and value.startswith('SG.') and len(value) >= 69:
             base_score = 90.0
         elif cred_type == 'jwt_token' and value.count('.') == 2:
             base_score = 85.0
+        elif cred_type == 'aws_secret_key' and len(value) == 40:
+            base_score = 80.0
         
-        # Context boost
-        sensitive_contexts = ['production', 'prod', 'live', 'api', 'secret', 'key']
+        # Context analysis boost
+        sensitive_contexts = ['production', 'prod', 'live', 'api', 'secret', 'key', 'credential']
         for context in sensitive_contexts:
             if context.lower() in content.lower():
                 base_score += 5.0
+        
+        # Proximity analysis - check for related patterns nearby
+        if cred_type == 'aws_access_key':
+            # Look for secret key patterns nearby
+            secret_pattern = r'[A-Za-z0-9/+=]{40}'
+            if re.search(secret_pattern, content):
+                base_score += 10.0
+        
+        elif cred_type == 'aws_secret_key':
+            # Look for access key patterns nearby
+            access_pattern = r'AKIA[0-9A-Z]{16}'
+            if re.search(access_pattern, content):
+                base_score += 10.0
+        
+        # File type context boost
+        if any(ext in content.lower() for ext in ['.env', 'config', 'credentials', 'secrets']):
+            base_score += 8.0
                 
         return min(base_score, 99.0)
 
-# ✅ NEW: Enhanced Telegram Notifier
+# ✅ ENHANCED: Telegram Notifier with professional alerting
 class TelegramEnhancedNotifier:
-    """Enhanced Telegram notifier with proper error handling"""
+    """Enhanced Telegram notifier with professional formatting and severity levels"""
     
     def __init__(self, token: str, chat_id: str):
         self.token = token
         self.chat_id = chat_id
         self.detector = EnhancedPerfectHitDetector()
-        print(f"📱 Telegram Enhanced Notifier initialized: Chat {chat_id}")
+        self.alert_count = 0
+        self.last_alert_time = 0
+        print(f"📱 Enhanced Professional Telegram Notifier initialized: Chat {chat_id}")
     
     async def send_any_hit(self, credentials: Dict[str, Any], endpoint: str):
-        """Send any credential hit to Telegram"""
+        """Send professional security alert with enhanced formatting"""
         try:
-            timestamp = datetime.utcnow().strftime('%H:%M:%S UTC')
+            # Rate limiting check (minimum 5 seconds between alerts)
+            current_time = time.time()
+            if current_time - self.last_alert_time < 5:
+                print(f"📱 Rate limiting: Alert queued")
+                return
             
-            # ✅ FIX: Initialize text variable properly
-            text = f"""🚨 <b>PERFECT HIT DETECTED</b> 🚨
+            self.last_alert_time = current_time
+            self.alert_count += 1
+            
+            timestamp = datetime.utcnow().strftime('%H:%M:%S UTC')
+            severity = credentials.get('severity', 'MEDIUM')
+            
+            # Severity-based emoji and formatting
+            severity_emojis = {
+                'LOW': '⚠️',
+                'MEDIUM': '🔸', 
+                'HIGH': '🔴',
+                'CRITICAL': '🚨'
+            }
+            
+            emoji = severity_emojis.get(severity, '⚠️')
+            
+            # Professional alert format
+            text = f"""{emoji} <b>SECURITY ALERT - {severity}</b> {emoji}
 
-🎯 Hit #{credentials['hit_id']}
-🔑 Type: {credentials['type']}
-💎 Value: <code>{credentials['value']}</code>
-📊 Confidence: {credentials['confidence']:.1f}%
+🎯 <b>Alert #{self.alert_count}</b>
+🔑 <b>Type:</b> {credentials['type'].replace('_', ' ').title()}
+💎 <b>Confidence:</b> {credentials['confidence']:.1f}%
+🎯 <b>Severity:</b> {severity}
 
-🌐 Source: {credentials['url']}
-📄 Endpoint: {endpoint}
-🕐 Time: {timestamp}
+📍 <b>Location:</b>
+• Source: {credentials['url']}
+• Endpoint: {endpoint}
 
-Operator: wKayaa | WWYV4Q Enhanced v3.1
-"""
+🔍 <b>Credential Preview:</b>
+<code>{credentials['value']}</code>
+
+🛠️ <b>Recommended Actions:</b>
+• Rotate credential immediately
+• Review access logs
+• Update security policies
+• Scan for unauthorized usage
+
+⏰ <b>Detected:</b> {timestamp}
+👤 <b>Scanner:</b> wKayaa Enhanced Monitor v2.0
+🆔 <b>Hit ID:</b> {credentials['hit_id']}
+
+<i>This is an automated security alert. Immediate action recommended for HIGH/CRITICAL severity.</i>"""
             
             await self._send_telegram_message(text)
-            print(f"📱 TELEGRAM HIT SENT: {credentials['type']}")
+            print(f"📱 PROFESSIONAL ALERT SENT: {credentials['type']} [{severity}]")
             
         except Exception as e:
-            print(f"📱 ❌ Send hit error: {e}")
+            print(f"📱 ❌ Enhanced alert error: {e}")
     
     async def _send_telegram_message(self, text: str):
         """Send message to Telegram with proper error handling"""
