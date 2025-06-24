@@ -162,19 +162,25 @@ Session: {datetime.utcnow().strftime('%Y%m%d_%H%M%S')}
         
         await self._send_telegram_message(message)
     
-    async def _send_telegram_message(self, message: str):
-        """Envoi effectif du message Telegram"""
-        if not self.enabled:
-            print(f"📱 TELEGRAM (DISABLED): {message[:100]}...")
-            return
-            
-        try:
-            # Simulation d'envoi - remplacer par vraie API
-            print(f"📱 TELEGRAM SENT: Mail credential alert")
-            # url = f"https://api.telegram.org/bot{self.token}/sendMessage"
-            # data = {"chat_id": self.chat_id, "text": message, "parse_mode": "HTML"}
-            # async with aiohttp.ClientSession() as session:
-            #     async with session.post(url, json=data) as response:
-            #         return await response.json()
-        except Exception as e:
-            print(f"❌ Telegram error: {e}")
+async def _send_telegram_message(self, message: str):
+    """Envoi effectif du message Telegram"""
+    text = message or "Mail notification (content unavailable)"  # Default value
+    
+    if not self.enabled:
+        print(f"📱 TELEGRAM (DISABLED): {text[:100]}...")
+        return
+        
+    try:
+        # Add actual implementation
+        print(f"📱 TELEGRAM SENT: Mail credential alert")
+        
+        # Uncomment when ready to use real API:
+        # url = f"https://api.telegram.org/bot{self.token}/sendMessage"
+        # data = {"chat_id": self.chat_id, "text": text, "parse_mode": "HTML"}
+        # async with aiohttp.ClientSession() as session:
+        #     async with session.post(url, json=data) as response:
+        #         return await response.json()
+        
+    except Exception as e:
+        print(f"❌ Telegram error: {e}")
+        # 'text' is now safely available

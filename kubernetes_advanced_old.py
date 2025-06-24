@@ -167,24 +167,38 @@ class WWYVQv5KubernetesOrchestrator:
     async def initialize(self, config: ExploitationConfig):
         self.framework = KubernetesAdvancedExploitation(config)
         
-    async def run_exploitation(self, targets: List[str]):
-        if not self.framework:
-            print("❌ Framework non initialisé")
-            return
-            
-        print(f"🎯 Début exploitation de {len(targets)} cibles")
+async def run_exploitation(self, targets: List[str]):
+    """Exploitation principale avec vraie parallélisation"""
+    expanded_targets = self.expand_targets(targets)
+    print(f"🎯 {len(expanded_targets)} IPs à scanner en mode {self.config.mode.value.upper()}")
+    
+    # ✅ FIXED: Configuration session optimisée
+    connector = aiohttp.TCPConnector(
+        limit=self.config.max_concurrent_clusters * 2,
+        limit_per_host=10,
+        ssl=False,
+        # OPTION 1: Use keepalive (recommended for performance)
+        keepalive_timeout=30,
+        enable_cleanup_closed=True
         
-        async with aiohttp.ClientSession() as session:
-            tasks = []
-            for target in targets:
-                base_url = f"https://{target}" if not target.startswith('http') else target
-                task = self.framework.exploit_cluster(session, target, base_url)
-                tasks.append(task)
-            
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+        # OPTION 2: Alternative - Force close all connections
+        # force_close=True
+        # Note: Cannot use both keepalive_timeout AND force_close=True
+    )
+    timeout = aiohttp.ClientTimeout(total=self.config.timeout_per_operation)
+    
+    async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+        # Semaphore pour contrôler la concurrence
+        semaphore = asyncio.Semaphore(self.config.max_concurrent_clusters)
         
-        self.framework.print_summary()
-        return results
+        async def scan_with_semaphore(ip):
+            async with semaphore:
+                await self.exploit_cluster(session, ip)
+        
+        # Lancement de tous les scans en parallèle
+        print(f"🔥 Démarrage du scan parallèle avec {self.config.max_concurrent_clusters} workers")
+        tasks = [scan_with_semaphore(ip) for ip in expanded_targets]
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 # Export des classes principales
 __all__ = [
