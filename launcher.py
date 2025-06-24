@@ -30,7 +30,7 @@ Examples:
     # Core options
     parser.add_argument('--mode', choices=['scan', 'exploit', 'mail', 'all'], 
                        default='exploit', help='Operation mode')
-    parser.add_argument('--file', '-f', default='targets_massive_optimized.txt',
+    parser.add_argument('--file', '-f', '--targets', dest='file', default='targets_massive_optimized.txt',
                        help='Target file path')
     parser.add_argument('--threads', type=int, default=500,
                        help='Number of concurrent threads')
