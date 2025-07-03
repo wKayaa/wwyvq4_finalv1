@@ -1,0 +1,23 @@
+{
+  "session_metadata": {
+    "session_id": "wKayaa_6H_Hunt_1751584124",
+    "start_time": "2025-07-03T23:08:44.067223",
+    "end_time": "2025-07-03T23:10:01.401364",
+    "duration": "0:01:17.334145",
+    "operator": "wKayaa"
+  },
+  "statistics": {
+    "clusters_scanned": 0,
+    "clusters_compromised": 0,
+    "secrets_extracted": 0,
+    "perfect_hits": 0,
+    "email_hits": 0,
+    "start_time": "2025-07-03T23:08:44.067223",
+    "session_id": "wKayaa_6H_Hunt_1751584124"
+  },
+  "results": {
+    "k8s_exploitation": null,
+    "email_hunting": {},
+    "production_harvesting": {}
+  }
+}

