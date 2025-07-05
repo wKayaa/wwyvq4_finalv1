@@ -804,5 +804,24 @@ async def main():
         logger.error(f"❌ Harvest operation failed: {e}")
         raise
 
+    async def run_comprehensive_harvest(self, targets):
+        """Main harvesting method expected by intensive_hunt_launcher"""
+        try:
+            # Convert targets to target ranges format
+            target_ranges = []
+            for target in targets:
+                # Convert IP or CIDR to range format
+                if "/" in target:
+                    target_ranges.append(target)
+                else:
+                    target_ranges.append(f"{target}/32")
+            
+            # Run the harvest operation
+            results = await self.run_harvest_operation(target_ranges)
+            return results
+        except Exception as e:
+            logger.error(f"❌ Comprehensive harvest failed: {e}")
+            return {"secrets": [], "error": str(e)}
+
 if __name__ == "__main__":
     asyncio.run(main())

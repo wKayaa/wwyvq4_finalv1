@@ -1125,4 +1125,8 @@ Hunt may continue or require restart."""
             <p><strong>Operator:</strong> wKayaa</p>
             <p><strong>Framework:</strong> Ultimate 6-Hour Hunt Engine</p>
         </div>
+    </div>
+</body>
+</html>
+        """
     

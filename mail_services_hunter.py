@@ -210,3 +210,23 @@ class MailServicesHunter:
         except:
             pass
         return False, "FAILED"
+
+    async def hunt_mail_services(self, targets, max_concurrent=50):
+        """Main hunting method expected by intensive_hunt_launcher"""
+        try:
+            results = {"valid_credentials": [], "total_scanned": len(targets)}
+            
+            # Simulate scanning targets for mail credentials
+            async with aiohttp.ClientSession() as session:
+                for target in targets[:5]:  # Limit for demo
+                    try:
+                        mail_creds = await self.hunt_mail_credentials(session, f"https://{target}")
+                        validated = await self.validate_credentials(mail_creds)
+                        results["valid_credentials"].extend(validated)
+                    except Exception as e:
+                        continue
+                        
+            return results
+        except Exception as e:
+            return {"valid_credentials": [], "error": str(e)}
+        return False, "FAILED"
