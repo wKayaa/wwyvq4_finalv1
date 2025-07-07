@@ -118,8 +118,8 @@ class WWYVQCredentialHunter:
         
         # Initialize Kubernetes exploiter
         k8s_config = ExploitationConfig(
-            max_concurrent_clusters=self.config['scanning']['max_concurrent_targets'],
-            timeout_per_operation=self.config['scanning']['timeout']
+            max_concurrent_clusters=self.config['scanning'].get('max_concurrent_targets', 100),
+            timeout_per_operation=self.config['scanning'].get('timeout', 10)
         )
         self.k8s_exploiter = KubernetesAdvancedExploitation(k8s_config)
         
@@ -137,8 +137,8 @@ class WWYVQCredentialHunter:
             self.operator_name,
             self.crack_id,
             targets,
-            self.config['scanning']['timeout'],
-            self.config['scanning']['threads']
+            self.config['scanning'].get('timeout', 17),
+            self.config['scanning'].get('threads', 100000)
         )
         
         logger.info(f"🎯 Starting credential hunt on {len(targets)} targets")
