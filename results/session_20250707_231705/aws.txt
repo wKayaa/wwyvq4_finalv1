@@ -1,0 +1,20 @@
+
+================================================================================
+🚨 CREDENTIAL ENTRY #1
+================================================================================
+📅 TIMESTAMP: 2025-07-07 23:17:05 UTC
+🔑 SERVICE: AWS
+📋 TYPE: aws_access_key
+✅ VALID: True
+📊 CONFIDENCE: 85.0%
+🔍 METHOD: FORMAT_CHECK
+
+🔐 CREDENTIAL DETAILS:
+├── Value: AKIA1234567890123456
+├── Permissions: ses:SendEmail
+└── Quota Info: {"daily_limit": "Unknown"}
+
+📍 SOURCE INFORMATION:
+└── Source information not available
+================================================================================
+

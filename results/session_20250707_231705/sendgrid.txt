@@ -1,0 +1,22 @@
+
+================================================================================
+🚨 CREDENTIAL ENTRY #2
+================================================================================
+📅 TIMESTAMP: 2025-07-07 23:17:05 UTC
+🔑 SERVICE: SendGrid
+📋 TYPE: sendgrid_key
+✅ VALID: False
+📊 CONFIDENCE: 20.0%
+🔍 METHOD: API_TEST
+
+🔐 CREDENTIAL DETAILS:
+├── Value: SG.demo_key_for_testing_only.example123456789
+├── Permissions: None
+└── Quota Info: N/A
+
+📍 SOURCE INFORMATION:
+└── Source information not available
+
+⚠️ ERROR: Test key detected
+================================================================================
+
