@@ -56,8 +56,8 @@ class WWYVQEnhancedFramework:
     
     def __init__(self, config_file: Optional[str] = None):
         self.config = self._load_config(config_file)
-        self.session_id = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        self.start_time = datetime.utcnow()
+        self.session_id = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.start_time = datetime.now()
         
         # Initialize components
         self.results_manager = OrganizedResultsManager()
@@ -402,7 +402,7 @@ Results Directory: {self.results_manager.session_dir}
     
     def _calculate_scan_speed(self) -> float:
         """Calculate current scan speed"""
-        duration = datetime.utcnow() - self.start_time
+        duration = datetime.now() - self.start_time
         minutes = duration.total_seconds() / 60
         if minutes > 0:
             return self.stats['clusters_scanned'] / minutes
@@ -458,6 +458,16 @@ async def main():
     parser.add_argument('--create-config', action='store_true', 
                        help='Create sample configuration file')
     
+    # CIDR expansion arguments
+    parser.add_argument('--no-cidr-expansion', action='store_true',
+                       help='Disable CIDR expansion')
+    parser.add_argument('--max-ips-per-cidr', type=int, default=None,
+                       help='Maximum IPs to extract from each CIDR range')
+    parser.add_argument('--no-randomize-ips', action='store_true',
+                       help='Disable randomization of IPs from CIDR ranges')
+    parser.add_argument('--include-ipv6', action='store_true',
+                       help='Include IPv6 CIDR ranges')
+    
     args = parser.parse_args()
     
     # Create sample config if requested
@@ -467,6 +477,10 @@ async def main():
         return
     
     # Load targets
+    if not args.targets:
+        logger.error("❌ No targets file specified. Use --targets or -t")
+        sys.exit(1)
+        
     if not os.path.exists(args.targets):
         logger.error(f"❌ Targets file not found: {args.targets}")
         sys.exit(1)
@@ -488,6 +502,16 @@ async def main():
     
     # Initialize framework
     framework = WWYVQEnhancedFramework(args.config)
+    
+    # Override CIDR configuration from command line arguments
+    if args.no_cidr_expansion:
+        framework.config['cidr']['expand_cidrs'] = False
+    if args.max_ips_per_cidr is not None:
+        framework.config['cidr']['max_ips_per_cidr'] = args.max_ips_per_cidr
+    if args.no_randomize_ips:
+        framework.config['cidr']['randomize_ips'] = False
+    if args.include_ipv6:
+        framework.config['cidr']['include_ipv6'] = True
     
     # Expand CIDR ranges
     targets = framework._expand_cidr_targets(raw_targets)
