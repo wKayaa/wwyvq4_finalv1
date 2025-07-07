@@ -11,6 +11,8 @@ import sys
 import os
 import time
 import json
+import random
+import ipaddress
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional, Any
@@ -98,6 +100,12 @@ class WWYVQEnhancedFramework:
                 'timeout': 10,
                 'retry_attempts': 3
             },
+            'cidr': {
+                'expand_cidrs': True,
+                'max_ips_per_cidr': 100,
+                'randomize_ips': True,
+                'include_ipv6': False
+            },
             'validation': {
                 'enabled': True,
                 'confidence_threshold': 75.0,
@@ -127,6 +135,98 @@ class WWYVQEnhancedFramework:
                 logger.error(f"❌ Error loading config file: {e}")
         
         return default_config
+    
+    def _expand_cidr_targets(self, targets: List[str]) -> List[str]:
+        """
+        Expand CIDR ranges into individual IP addresses
+        
+        Args:
+            targets: List of targets (IPs, URLs, CIDR ranges)
+            
+        Returns:
+            List of expanded targets with CIDR ranges converted to individual IPs
+        """
+        if not self.config['cidr']['expand_cidrs']:
+            logger.info("🔄 CIDR expansion disabled in configuration")
+            return targets
+            
+        expanded_targets = []
+        cidr_stats = {
+            'total_cidrs': 0,
+            'total_ips_generated': 0,
+            'skipped_cidrs': 0
+        }
+        
+        max_ips = self.config['cidr']['max_ips_per_cidr']
+        randomize = self.config['cidr']['randomize_ips']
+        include_ipv6 = self.config['cidr']['include_ipv6']
+        
+        logger.info(f"🎯 Expanding CIDR ranges (max {max_ips} IPs per CIDR, randomize: {randomize})")
+        
+        for target in targets:
+            target = target.strip()
+            
+            # Skip empty lines and comments
+            if not target or target.startswith('#'):
+                continue
+                
+            # Check if target is a CIDR range
+            if '/' in target:
+                try:
+                    # Try to parse as IP network
+                    network = ipaddress.ip_network(target, strict=False)
+                    
+                    # Skip IPv6 if not enabled
+                    if network.version == 6 and not include_ipv6:
+                        logger.info(f"⏭️  Skipping IPv6 CIDR {target} (IPv6 disabled)")
+                        cidr_stats['skipped_cidrs'] += 1
+                        continue
+                    
+                    # Get all host IPs from the network
+                    hosts = list(network.hosts())
+                    total_hosts = len(hosts)
+                    
+                    if total_hosts == 0:
+                        logger.warning(f"⚠️  CIDR {target} has no host IPs")
+                        continue
+                    
+                    # Limit number of IPs if needed
+                    if total_hosts > max_ips:
+                        if randomize:
+                            # Randomly sample IPs
+                            hosts = random.sample(hosts, max_ips)
+                            logger.info(f"🎲 CIDR {target} -> {max_ips} random IPs (out of {total_hosts:,})")
+                        else:
+                            # Take first N IPs
+                            hosts = hosts[:max_ips]
+                            logger.info(f"📊 CIDR {target} -> first {max_ips} IPs (out of {total_hosts:,})")
+                    else:
+                        logger.info(f"📊 CIDR {target} -> {total_hosts} IPs")
+                    
+                    # Convert to strings and add to expanded targets
+                    expanded_targets.extend([str(ip) for ip in hosts])
+                    cidr_stats['total_cidrs'] += 1
+                    cidr_stats['total_ips_generated'] += len(hosts)
+                    
+                except ValueError as e:
+                    logger.warning(f"⚠️  Invalid CIDR {target}: {e}")
+                    # Add as regular target if not a valid CIDR
+                    expanded_targets.append(target)
+                except Exception as e:
+                    logger.error(f"❌ Error expanding CIDR {target}: {e}")
+                    cidr_stats['skipped_cidrs'] += 1
+            else:
+                # Regular IP/URL target
+                expanded_targets.append(target)
+        
+        # Log statistics
+        logger.info(f"📈 CIDR Expansion Summary:")
+        logger.info(f"   • CIDR ranges processed: {cidr_stats['total_cidrs']}")
+        logger.info(f"   • Individual IPs generated: {cidr_stats['total_ips_generated']:,}")
+        logger.info(f"   • CIDR ranges skipped: {cidr_stats['skipped_cidrs']}")
+        logger.info(f"   • Total targets after expansion: {len(expanded_targets):,}")
+        
+        return expanded_targets
     
     async def run_enhanced_scan(self, targets: List[str], scan_mode: str = 'standard'):
         """Run enhanced credential scanning with all improvements"""
@@ -322,6 +422,12 @@ Results Directory: {self.results_manager.session_dir}
                 "timeout": 10,
                 "retry_attempts": 3
             },
+            "cidr": {
+                "expand_cidrs": True,
+                "max_ips_per_cidr": 100,
+                "randomize_ips": True,
+                "include_ipv6": False
+            },
             "validation": {
                 "enabled": True,
                 "confidence_threshold": 75.0,
@@ -365,17 +471,34 @@ async def main():
         logger.error(f"❌ Targets file not found: {args.targets}")
         sys.exit(1)
     
-    with open(args.targets, 'r') as f:
-        targets = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    # Load targets with proper encoding handling
+    try:
+        with open(args.targets, 'r', encoding='utf-8') as f:
+            raw_targets = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    except UnicodeDecodeError:
+        # Try with ISO-8859-1 encoding as fallback
+        with open(args.targets, 'r', encoding='iso-8859-1') as f:
+            raw_targets = [line.strip() for line in f if line.strip() and not line.startswith('#')]
     
-    if not targets:
+    if not raw_targets:
         logger.error("❌ No targets found in file")
         sys.exit(1)
     
-    logger.info(f"📋 Loaded {len(targets)} targets")
+    logger.info(f"📋 Loaded {len(raw_targets)} raw targets from file")
     
-    # Initialize and run framework
+    # Initialize framework
     framework = WWYVQEnhancedFramework(args.config)
+    
+    # Expand CIDR ranges
+    targets = framework._expand_cidr_targets(raw_targets)
+    
+    if not targets:
+        logger.error("❌ No valid targets after CIDR expansion")
+        sys.exit(1)
+    
+    logger.info(f"🎯 Final target count: {len(targets)} (after CIDR expansion)")
+    
+    # Run enhanced scan
     await framework.run_enhanced_scan(targets, args.mode)
 
 if __name__ == "__main__":
