@@ -1,0 +1,21 @@
+# 🎯 WWYVQ Credential Hunter - Sample Targets
+# Replace with your actual targets
+# Supports IP addresses, CIDR blocks, and hostnames
+
+# Example API endpoints
+https://api.example.com/config
+https://api.example.com/v1/settings
+https://config.example.com/api/keys
+
+# Example domains
+example.com
+api.production.com
+config.staging.com
+
+# Example IP ranges
+192.168.1.0/24
+10.0.0.0/24
+
+# Example individual IPs
+127.0.0.1
+192.168.1.1
