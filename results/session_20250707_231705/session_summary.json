@@ -1,0 +1,16 @@
+{
+  "session_id": "20250707_231705",
+  "session_start": "2025-07-07T23:17:05.121152",
+  "session_duration": "0:00:00.001988",
+  "total_credentials": 3,
+  "valid_credentials": 2,
+  "invalid_credentials": 1,
+  "success_rate": 66.66666666666666,
+  "services_found": {
+    "AWS": 1,
+    "SendGrid": 1,
+    "Mailgun": 1
+  },
+  "results_directory": "results/session_20250707_231705",
+  "generated_at": "2025-07-07T23:17:05.123155"
+}

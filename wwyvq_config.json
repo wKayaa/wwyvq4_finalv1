@@ -1,0 +1,26 @@
+{
+  "telegram": {
+    "enabled": true,
+    "bot_token": "YOUR_BOT_TOKEN_HERE",
+    "chat_id": "YOUR_CHAT_ID_HERE",
+    "rate_limit_delay": 1.0
+  },
+  "scanning": {
+    "max_concurrent": 50,
+    "timeout": 10,
+    "retry_attempts": 3
+  },
+  "validation": {
+    "enabled": true,
+    "confidence_threshold": 75.0,
+    "validate_aws": true,
+    "validate_sendgrid": true,
+    "validate_mailgun": true
+  },
+  "results": {
+    "save_all": true,
+    "save_validated_only": false,
+    "export_json": true,
+    "export_csv": true
+  }
+}

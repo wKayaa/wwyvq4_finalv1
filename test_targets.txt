@@ -1,0 +1,10 @@
+# Test targets for WWYVQ Enhanced Framework
+# Add your real targets here
+
+# Example Kubernetes endpoints (replace with real ones)
+https://your-k8s-cluster.com:6443
+https://another-cluster.example.com:8443
+
+# Example web applications
+https://httpbin.org/json
+https://jsonplaceholder.typicode.com/posts/1
