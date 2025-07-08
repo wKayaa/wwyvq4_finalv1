@@ -159,22 +159,39 @@ class WWYVQEngine:
         
         for module_name in modules_to_load:
             try:
-                # Dynamic import with v2.1 path
-                module_path = f"wwyvq_v2.1.{module_name}"
-                module = __import__(module_path, fromlist=[module_name])
-                
-                # Get main class from module
-                main_class_name = f"{module_name.title()}Module"
-                if hasattr(module, main_class_name):
-                    module_class = getattr(module, main_class_name)
-                    self.modules[module_name] = module_class(
-                        self.config_manager,
-                        self.logger,
-                        self
+                # Dynamic import with absolute imports
+                if module_name == 'exploit':
+                    from wwyvq_v21.exploit import ExploitModule
+                    self.modules[module_name] = ExploitModule(
+                        self.config_manager, self.logger, self
                     )
-                    self.logger.info(f"✅ Module '{module_name}' loaded and initialized")
-                else:
-                    self.logger.warning(f"⚠️ Module '{module_name}' main class not found")
+                elif module_name == 'scrape':
+                    from wwyvq_v21.scrape import ScrapeModule
+                    self.modules[module_name] = ScrapeModule(
+                        self.config_manager, self.logger, self
+                    )
+                elif module_name == 'validator':
+                    from wwyvq_v21.validator import ValidatorModule
+                    self.modules[module_name] = ValidatorModule(
+                        self.config_manager, self.logger, self
+                    )
+                elif module_name == 'notifier':
+                    from wwyvq_v21.notifier import NotifierModule
+                    self.modules[module_name] = NotifierModule(
+                        self.config_manager, self.logger, self
+                    )
+                elif module_name == 'exporter':
+                    from wwyvq_v21.exporter import ExporterModule
+                    self.modules[module_name] = ExporterModule(
+                        self.config_manager, self.logger, self
+                    )
+                elif module_name == 'utils':
+                    from wwyvq_v21.utils import UtilsModule
+                    self.modules[module_name] = UtilsModule(
+                        self.config_manager, self.logger, self
+                    )
+                
+                self.logger.info(f"✅ Module '{module_name}' loaded and initialized")
                     
             except ImportError as e:
                 self.logger.warning(f"⚠️ Module '{module_name}' not available: {e}")

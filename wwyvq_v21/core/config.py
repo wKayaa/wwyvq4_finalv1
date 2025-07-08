@@ -217,10 +217,10 @@ class ConfigurationManager:
         
         # Look for config files in order of preference
         search_paths = [
-            Path("./wwyvq_v2.1/config/default.yaml"),
-            Path("./wwyvq_v2.1/config/default.json"),
-            Path("./config/wwyvq_v2.1.yaml"),
-            Path("./config/wwyvq_v2.1.json"),
+            Path("./wwyvq_v21/config/default.yaml"),
+            Path("./wwyvq_v21/config/default.json"),
+            Path("./config/wwyvq_v21.yaml"),
+            Path("./config/wwyvq_v21.json"),
             Path("./wwyvq_config.yaml"),
             Path("./wwyvq_config.json")
         ]
@@ -230,7 +230,7 @@ class ConfigurationManager:
                 return path
         
         # Default to YAML in config directory
-        return Path("./wwyvq_v2.1/config/default.yaml")
+        return Path("./wwyvq_v21/config/default.yaml")
     
     def _load_config(self):
         """Load configuration from file"""

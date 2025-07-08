@@ -13,13 +13,13 @@ import argparse
 from pathlib import Path
 from typing import Optional, List
 
-# Add wwyvq_v2.1 to path
-sys.path.insert(0, str(Path(__file__).parent / "wwyvq_v2.1"))
+# Add wwyvq_v21 to path
+sys.path.insert(0, str(Path(__file__).parent))
 
-from core.engine import WWYVQEngine
-from interface.cli.main import WWYVQCLIInterface
-from interface.web.dashboard import WWYVQWebDashboard
-from interface.api.rest_api import WWYVQRestAPI
+from wwyvq_v21.core.engine import WWYVQEngine
+from wwyvq_v21.interface.cli import WWYVQCLIInterface
+from wwyvq_v21.interface.web import WWYVQWebDashboard
+from wwyvq_v21.interface.api import WWYVQRestAPI
 
 
 class WWYVQRunner:
