@@ -1,0 +1,77 @@
+# WWYVQ Framework v2 - Default Configuration
+# Author: wKayaa
+# Date: 2025-01-15
+
+version: "2.0.0"
+created_at: "2025-01-15T10:00:00Z"
+
+# Core Engine Configuration
+core:
+  session_id: "auto"
+  max_concurrent: 100
+  timeout: 30
+  retry_attempts: 3
+  safe_mode: true
+  debug_mode: false
+
+# Modules Configuration
+modules:
+  # Exploitation Module
+  exploit:
+    enabled: true
+    stealth_mode: false
+    max_pods: 10
+    
+  # Scanner Module
+  scanner:
+    enabled: true
+    port_range: [80, 443, 6443, 8080, 8443, 10250, 2379, 2376]
+    timeout: 10
+    
+  # Validator Module
+  validator:
+    enabled: true
+    api_timeout: 10
+    max_retries: 3
+    
+  # Notifier Module
+  notifier:
+    telegram:
+      enabled: false
+      token: ""
+      chat_id: ""
+    discord:
+      enabled: false
+      webhook_url: ""
+    email:
+      enabled: false
+      smtp_server: ""
+      smtp_port: 587
+      username: ""
+      password: ""
+
+# Target Configuration
+targets:
+  cidr_expansion: true
+  max_ips_per_cidr: 1000
+  default_ports: [6443, 8443, 8080]
+  timeout_per_target: 10
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  file_enabled: true
+  file_path: "logs/wwyvq.log"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  console_enabled: true
+
+# Security Configuration
+security:
+  encryption_enabled: true
+  audit_logging: true
+  session_timeout: 3600
+  safe_mode_restrictions:
+    - "no_pod_deployment"
+    - "no_privilege_escalation"
+    - "readonly_operations"
