@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "session_id": "1ae53373",
+    "created_at": "2025-07-08T01:55:09.414844",
+    "updated_at": "2025-07-08T01:55:09.414845",
+    "status": "active",
+    "operation_type": "test_operation",
+    "targets_count": 0,
+    "results_count": 0,
+    "errors_count": 0,
+    "config_snapshot": {
+      "core": {
+        "session_id": "auto",
+        "max_concurrent": 100,
+        "timeout": 30,
+        "retry_attempts": 3,
+        "safe_mode": true,
+        "debug_mode": false,
+        "rate_limit": 2.0,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      },
+      "targets": {
+        "default_ports": [
+          80,
+          443,
+          8080,
+          8443,
+          6443,
+          10250,
+          2379,
+          2380
+        ],
+        "cidr_expansion": true,
+        "max_targets": 10000,
+        "dns_resolution": true,
+        "ip_randomization": true
+      },
+      "exploit": {
+        "k8s_focus": true,
+        "cluster_detection": true,
+        "pod_exploitation": true,
+        "service_account_enum": true,
+        "secret_extraction": true,
+        "rbac_enumeration": true,
+        "network_policies": true,
+        "admission_controllers": true,
+        "cve_exploitation": true,
+        "stealth_mode": false
+      },
+      "scrape": {
+        "api_key_patterns": true,
+        "env_file_extraction": true,
+        "js_file_analysis": true,
+        "config_file_hunt": true,
+        "max_paths": 2500,
+        "depth_limit": 5,
+        "file_size_limit": 1048576,
+        "regex_patterns": true,
+        "heuristic_analysis": true
+      },
+      "validator": {
+        "real_time_validation": true,
+        "aws_validation": true,
+        "sendgrid_validation": true,
+        "smtp_validation": true,
+        "mailgun_validation": true,
+        "twilio_validation": true,
+        "classification_enabled": true,
+        "confidence_threshold": 0.7,
+        "validation_timeout": 10
+      },
+      "notifier": {
+        "telegram_enabled": true,
+        "discord_enabled": false,
+        "valid_creds_only": true,
+        "professional_format": true,
+        "telegram_token": "",
+        "telegram_chat_id": "",
+        "discord_webhook": "",
+        "notification_threshold": 0.8
+      },
+      "exporter": {
+        "auto_export": true,
+        "export_format": "json",
+        "export_path": "./results",
+        "session_backup": true,
+        "result_archiving": true,
+        "report_generation": true
+      },
+      "interface": {
+        "cli_colors": true,
+        "web_enabled": true,
+        "api_enabled": true,
+        "web_host": "0.0.0.0",
+        "web_port": 8080,
+        "api_host": "0.0.0.0",
+        "api_port": 8081,
+        "api_auth": true,
+        "api_key": "wwyvq_api_key_v2.1"
+      },
+      "logging": {
+        "level": "INFO",
+        "file_logging": true,
+        "console_logging": true,
+        "log_file": "./logs/wwyvq_v2.1.log",
+        "max_log_size": 10485760,
+        "backup_count": 5,
+        "log_format": "%(asctime)s | %(levelname)8s | %(name)s | %(message)s"
+      }
+    },
+    "custom_data": {}
+  },
+  "results": [],
+  "logs": []
+}
