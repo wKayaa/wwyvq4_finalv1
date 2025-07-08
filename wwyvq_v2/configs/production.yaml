@@ -1,0 +1,74 @@
+# WWYVQ Framework v2 - Production Configuration
+# Author: wKayaa
+# Date: 2025-01-15
+
+version: "2.0.0"
+created_at: "2025-01-15T10:00:00Z"
+
+# Core Engine Configuration - Production Optimized
+core:
+  session_id: "auto"
+  max_concurrent: 500
+  timeout: 60
+  retry_attempts: 5
+  safe_mode: false
+  debug_mode: false
+
+# Modules Configuration - Production
+modules:
+  # Exploitation Module - Full Power
+  exploit:
+    enabled: true
+    stealth_mode: true
+    max_pods: 50
+    
+  # Scanner Module - Enhanced
+  scanner:
+    enabled: true
+    port_range: [80, 443, 6443, 8080, 8443, 10250, 2379, 2376, 8001, 8002, 9090, 9443]
+    timeout: 30
+    
+  # Validator Module - Production
+  validator:
+    enabled: true
+    api_timeout: 30
+    max_retries: 5
+    
+  # Notifier Module - Full Integration
+  notifier:
+    telegram:
+      enabled: true
+      token: "${TELEGRAM_TOKEN}"
+      chat_id: "${TELEGRAM_CHAT_ID}"
+    discord:
+      enabled: true
+      webhook_url: "${DISCORD_WEBHOOK_URL}"
+    email:
+      enabled: true
+      smtp_server: "${SMTP_SERVER}"
+      smtp_port: 587
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+
+# Target Configuration - Production Scale
+targets:
+  cidr_expansion: true
+  max_ips_per_cidr: 10000
+  default_ports: [6443, 8443, 8080, 10250, 2379, 2376, 9090, 9443]
+  timeout_per_target: 30
+
+# Logging Configuration - Production
+logging:
+  level: "INFO"
+  file_enabled: true
+  file_path: "logs/wwyvq_production.log"
+  max_file_size: 52428800  # 50MB
+  backup_count: 10
+  console_enabled: true
+
+# Security Configuration - Production
+security:
+  encryption_enabled: true
+  audit_logging: true
+  session_timeout: 7200  # 2 hours
+  safe_mode_restrictions: []  # No restrictions in production

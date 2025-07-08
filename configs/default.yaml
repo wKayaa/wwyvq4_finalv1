@@ -1,0 +1,58 @@
+core:
+  debug_mode: false
+  max_concurrent: 100
+  retry_attempts: 3
+  safe_mode: true
+  session_id: auto
+  timeout: 30
+created_at: '2025-07-08T01:12:53.857739'
+logging:
+  backup_count: 5
+  console_enabled: true
+  file_enabled: true
+  file_path: logs/wwyvq.log
+  level: INFO
+  max_file_size: 10000000
+modules:
+  exploit:
+    enabled: true
+    max_pods: 10
+    stealth_mode: false
+  notifier:
+    discord:
+      enabled: false
+      webhook_url: ''
+    telegram:
+      chat_id: ''
+      enabled: false
+      token: ''
+  scanner:
+    enabled: true
+    port_range:
+    - 80
+    - 443
+    - 6443
+    - 8080
+    - 8443
+    timeout: 10
+  validator:
+    api_timeout: 10
+    enabled: true
+    max_retries: 3
+security:
+  audit_logging: true
+  encryption_enabled: true
+  safe_mode_restrictions:
+  - no_pod_deployment
+  - no_privilege_escalation
+  - readonly_operations
+  session_timeout: 3600
+targets:
+  cidr_expansion: true
+  default_ports:
+  - 6443
+  - 8443
+  - 8080
+  max_ips_per_cidr: 1000
+  timeout_per_target: 10
+version: 2.0.0
