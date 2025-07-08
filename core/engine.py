@@ -333,40 +333,57 @@ class WWYVQCoreEngine:
     async def _register_default_modules(self) -> None:
         """Register default modules if available"""
         try:
-            # Try to import and register existing modules
-            from ..exploit.kubernetes_exploit import KubernetesExploitModule
+            # Try to import and register existing modules with absolute imports
+            import sys
+            from pathlib import Path
+            
+            # Add the base directory to path for imports
+            base_dir = Path(__file__).parent.parent
+            if str(base_dir) not in sys.path:
+                sys.path.insert(0, str(base_dir))
+            
+            from exploit.kubernetes_exploit import KubernetesExploitModule
             await self.register_module(ModuleType.EXPLOIT, "kubernetes", KubernetesExploitModule())
-        except ImportError:
-            self.logger.warning("⚠️ Kubernetes exploit module not available")
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Kubernetes exploit module not available: {e}")
         
         try:
-            from ..validator.credential_validator import CredentialValidatorModule
+            from exploit.scraper import IntelligentScraper
+            await self.register_module(ModuleType.EXPLOIT, "scraper", IntelligentScraper())
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Intelligent scraper module not available: {e}")
+        
+        try:
+            from validator.credential_validator import CredentialValidatorModule
             await self.register_module(ModuleType.VALIDATOR, "credentials", CredentialValidatorModule())
-        except ImportError:
-            self.logger.warning("⚠️ Credential validator module not available")
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Credential validator module not available: {e}")
         
         try:
-            from ..notifier.telegram_notifier import TelegramNotifierModule
+            from notifier.telegram_notifier import TelegramNotifierModule
             await self.register_module(ModuleType.NOTIFIER, "telegram", TelegramNotifierModule())
-        except ImportError:
-            self.logger.warning("⚠️ Telegram notifier module not available")
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Telegram notifier module not available: {e}")
         
         try:
-            from ..exporter.json_exporter import JsonExporterModule
+            from notifier.discord_notifier import DiscordNotifierModule
+            await self.register_module(ModuleType.NOTIFIER, "discord", DiscordNotifierModule())
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Discord notifier module not available: {e}")
+        
+        try:
+            from exporter.json_exporter import JsonExporterModule
             await self.register_module(ModuleType.EXPORTER, "json", JsonExporterModule())
-        except ImportError:
-            self.logger.warning("⚠️ JSON exporter module not available")
+        except ImportError as e:
+            self.logger.warning(f"⚠️ JSON exporter module not available: {e}")
     
     async def _validate_system_readiness(self) -> bool:
         """Validate system is ready for operation"""
         try:
-            # Check if at least one module of each type is registered
-            critical_modules = [ModuleType.EXPLOIT, ModuleType.VALIDATOR]
-            
-            for module_type in critical_modules:
-                if not self.modules[module_type]:
-                    self.logger.error(f"❌ No {module_type.value} modules registered")
-                    return False
+            # Check if at least one exploitation module is registered
+            if not self.modules[ModuleType.EXPLOIT]:
+                self.logger.error("❌ No exploit modules registered")
+                return False
             
             # Check configuration
             if not self.config_manager.is_valid():

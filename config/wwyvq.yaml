@@ -1,0 +1,48 @@
+exploit:
+  cidr_expansion: true
+  enabled: true
+  kubernetes_focus: true
+  max_concurrent_clusters: 50
+  paths_to_scan: 2500
+  rate_limit_delay: 0.1
+  stealth_mode: false
+  timeout_per_operation: 30
+exporter:
+  compression: false
+  create_host_file: true
+  csv_export: true
+  enabled: true
+  encryption: false
+  json_export: true
+  output_directory: ./results
+  yaml_export: false
+notifier:
+  discord_enabled: false
+  discord_webhook_url: ''
+  enabled: true
+  professional_format: true
+  rate_limit_delay: 1.0
+  telegram_chat_id: ''
+  telegram_enabled: false
+  telegram_token: ''
+  valid_credentials_only: true
+system:
+  debug_mode: false
+  job_timeout: 3600
+  log_level: INFO
+  max_concurrent_jobs: 5
+  memory_limit_mb: 2048
+  operator_name: wKayaa
+  scan_name: WWYVQ_Scan
+  temp_directory: /tmp/wwyvq
+validator:
+  batch_size: 10
+  confidence_threshold: 75.0
+  enabled: true
+  real_time_validation: true
+  validate_aws: true
+  validate_mailgun: true
+  validate_sendgrid: true
+  validate_smtp: true
+  validate_twilio: true
+version: '2.1'
