@@ -1,0 +1,16 @@
+# WWYVQ v2.1 Core Dependencies
+# Minimum required packages for basic functionality
+
+# Core HTTP client for network operations
+aiohttp>=3.8.0
+
+# Configuration file support
+pyyaml>=6.0
+
+# Enhanced CLI features (optional)
+rich>=13.0.0
+questionary>=1.10.0
+colorama>=0.4.6
+
+# Async support
+asyncio-mqtt>=0.10.0
