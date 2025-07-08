@@ -289,8 +289,11 @@ def load_targets(targets_input: str) -> List[str]:
         with open(targets_input, 'r', encoding='utf-8') as f:
             targets = [line.strip() for line in f if line.strip() and not line.startswith('#')]
     else:
-        # Cible unique
-        targets = [targets_input]
+        # Cibles multiples séparées par des virgules ou cible unique
+        if ',' in targets_input:
+            targets = [target.strip() for target in targets_input.split(',')]
+        else:
+            targets = [targets_input]
     
     print(f"📊 Loaded {len(targets)} targets")
     return targets
