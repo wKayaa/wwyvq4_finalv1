@@ -48,3 +48,6 @@ Thumbs.db
 # Security scanning results
 *_results.json
 *_logs.json
+
+# WWYVQ Enhanced Framework results
+results/session_*/

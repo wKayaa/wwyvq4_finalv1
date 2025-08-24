@@ -10,6 +10,12 @@
     "timeout": 10,
     "retry_attempts": 3
   },
+  "cidr": {
+    "expand_cidrs": true,
+    "max_ips_per_cidr": 100,
+    "randomize_ips": true,
+    "include_ipv6": false
+  },
   "validation": {
     "enabled": true,
     "confidence_threshold": 75.0,
